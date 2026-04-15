@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 雅思口說教練</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; text-align: center; background-color: #f4f7f6; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; }
+        .question-box { background: #e8f4f8; padding: 15px; border-radius: 8px; font-size: 1.2em; font-weight: bold; color: #34495e; margin-bottom: 20px; }
+        button { padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin: 10px; transition: 0.3s; }
+        #recordBtn { background-color: #e74c3c; color: white; }
+        #recordBtn:hover { background-color: #c0392b; }
+        #stopBtn { background-color: #95a5a6; color: white; }
+        #stopBtn:disabled { background-color: #ecf0f1; cursor: not-allowed; }
+        #status { margin-top: 15px; color: #e67e22; font-weight: bold; }
+        #feedback { margin-top: 25px; text-align: left; background: #fafafa; padding: 20px; border-left: 5px solid #2ecc71; border-radius: 5px; white-space: pre-wrap; display: none; line-height: 1.6;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🤖 AI 雅思口說教練</h1>
+    <p>點擊錄音，回答下方的問題吧！</p>
+    
+    <div class="question-box" id="questionBox">載入題目中...</div>
+    
+    <button id="recordBtn">🎤 開始錄音</button>
+    <button id="stopBtn" disabled>⏹️ 停止並送出評分</button>
+    
+    <div id="status">準備就緒</div>
+    <div id="feedback"></div>
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "@google/generative-ai": "https://esm.run/@google/generative-ai"
+    }
+  }
+</script>
+
+<script type="module">
+    import { GoogleGenerativeAI } from "@google/generative-ai";
+
+    // ⚠️ 警告：在 GitHub Pages 使用 API Key 會被公開看到！
+    // 請務必去 Google AI Studio 設定「網站限制 (Website restriction)」，只允許你的 GitHub 網址使用此 Key。
+    const API_KEY = "請在這裡貼上你的_GEMINI_API_KEY"; 
+    const genAI = new GoogleGenerativeAI(API_KEY);
+
+    // 因為前端無法輕易爬蟲，這裡改用內建題庫
+    const questions = [
+        "What is your hometown like?",
+        "Do you prefer to study in the morning or evening?",
+        "Tell me about a book you read recently.",
+        "How often do you use social media?",
+        "What are your favorite types of food?",
+        "Describe a hobby you enjoy doing in your free time."
+    ];
+
+    const questionBox = document.getElementById('questionBox');
+    const recordBtn = document.getElementById('recordBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusText = document.getElementById('status');
+    const feedbackBox = document.getElementById('feedback');
+
+    // 隨機抽題
+    let currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+    questionBox.innerText = currentQuestion;
+
+    let mediaRecorder;
+    let audioChunks = [];
+
+    recordBtn.addEventListener('click', async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                statusText.innerText = "⏳ AI 正在分析你的發音與文法，請稍候...";
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                await sendToGemini(audioBlob);
+            };
+
+            mediaRecorder.start();
+            recordBtn.disabled = true;
+            recordBtn.style.backgroundColor = "#ccc";
+            stopBtn.disabled = false;
+            stopBtn.style.backgroundColor = "#3498db";
+            statusText.innerText = "🔴 正在錄音中... (請開始說話)";
+            feedbackBox.style.display = "none";
+        } catch (err) {
+            alert("無法存取麥克風，請確認瀏覽器權限！");
+        }
+    });
+
+    stopBtn.addEventListener('click', () => {
+        mediaRecorder.stop();
+        recordBtn.disabled = false;
+        recordBtn.style.backgroundColor = "#e74c3c";
+        stopBtn.disabled = true;
+        stopBtn.style.backgroundColor = "#95a5a6";
+    });
+
+    async function sendToGemini(blob) {
+        try {
+            // 將音檔轉為 Base64
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = async () => {
+                const base64Audio = reader.result.split(',')[1];
+
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                
+                const prompt = `You are a strict but encouraging IELTS speaking examiner. 
+                The student is answering this question: '${currentQuestion}'. 
+                Please listen to their audio response and provide:
+                1. An estimated Band Score (0-9).
+                2. Feedback on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.
+                3. A short, better way to answer this question to get a Band 8.0+.
+                Please reply in Traditional Chinese (請用繁體中文回覆評語).`;
+
+                const result = await model.generateContent([
+                    prompt,
+                    { inlineData: { mimeType: "audio/wav", data: base64Audio } }
+                ]);
+
+                feedbackBox.innerText = result.response.text();
+                feedbackBox.style.display = "block";
+                statusText.innerText = "✅ 分析完成！";
+                
+                // 換下一題
+                currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+                questionBox.innerText = currentQuestion;
+            };
+        } catch (error) {
+            statusText.innerText = "❌ 發生錯誤，請檢查 API Key 或網路連線。";
+            console.error(error);
+        }
+    }
+</script>
+
+</body>
+</html>
