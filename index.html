@@ -253,7 +253,7 @@
 </div>
 
 <script>
-    let myRadarChart = null; // 儲存雷達圖實例
+    let myRadarChart = null; 
 
     // === 圖片上傳與預覽邏輯 ===
     window.onload = function() { toggleImageUpload(); };
@@ -322,14 +322,11 @@
 
         const taskType = document.getElementById('taskType').value;
         totalSeconds = taskType === "1" ? 20 * 60 : 40 * 60;
-        
-        // totalSeconds = 5; // 測試用
 
         remainingSeconds = totalSeconds;
         document.getElementById('setup-section').style.display = 'none';
         document.getElementById('writing-section').style.display = 'block';
         
-        // 強制鎖定游標解決貼上問題
         document.getElementById('essay').focus(); 
         
         document.getElementById('timer-text').innerText = formatTime(remainingSeconds);
@@ -367,28 +364,36 @@
         document.getElementById('loader').style.display = 'block';
         document.getElementById('result-container').style.display = 'none';
 
-        // 🌟 重新設計的 Prompt：強制 AI 以 JSON 格式回傳，方便我們畫圖
+        // 🌟 更新版 Prompt：嚴格防堵 JSON 換行字元錯誤
         const promptText = `
         You are an expert IELTS Examiner. Evaluate the following IELTS Task ${taskType} essay.
         Topic: "${topic}"
         ${(taskType === "1" && imageSrc) ? "(Image attached for context)" : ""}
         Essay: "${essay || '(Blank paper)'}"
         
-        You MUST respond ONLY with a raw JSON object (do not wrap in \`\`\`json). The JSON must exactly match this structure:
+        You MUST respond ONLY with a raw JSON object. 
+        ⚠️ CRITICAL JSON RULES:
+        1. Do NOT wrap the response in \`\`\`json markdown blocks. Return the JSON directly.
+        2. All string values MUST NOT contain raw line breaks. You MUST escape newlines by using "\\n".
+        3. Escape any internal double quotes using "\\"".
+        4. Do not include tab characters, use spaces instead.
+        
+        The JSON must exactly match this structure:
         {
           "overallScore": 7.5,
           "TR": 7.0,
           "CC": 8.0,
           "LR": 7.0,
           "GRA": 8.0,
-          "feedback": "Write your detailed evaluation, corrections, and tips in Markdown format here.",
-          "modelEssay": "Write a complete Band 9 model essay for this specific topic in Markdown format here."
+          "feedback": "Write your detailed evaluation in Markdown format here. Remember to use \\n for paragraph breaks instead of pressing Enter.",
+          "modelEssay": "Write a complete Band 9 model essay here. Remember to use \\n for paragraph breaks."
         }
         `;
 
         let messagesContent = [{ "type": "text", "text": promptText }];
         let currentModel = 'command-a-03-2025';
 
+        // 處理圖片上傳與格式修正
         if (taskType === "1" && imageSrc && imageSrc.startsWith('data:image')) {
             let cleanImageSrc = imageSrc.replace('data:image/jpg;base64,', 'data:image/jpeg;base64,');
             if (!cleanImageSrc.match(/^data:image\/(png|jpeg|webp|gif);base64,/)) {
@@ -414,28 +419,35 @@
             
             const aiText = (await response.json()).message.content[0].text;
             
-            // 解析 JSON (用 Regex 確保抓取乾淨的 JSON 區塊)
+            // 抓取 JSON 區塊
             const jsonMatch = aiText.match(/\{[\s\S]*\}/);
             if (!jsonMatch) throw new Error("AI 回傳格式異常，無法繪製圖表。請重新評估一次。");
             
-            const resultData = JSON.parse(jsonMatch[0]);
+            // 🌟 清洗字串：濾除導致 JSON.parse 崩潰的隱藏控制字元
+            let rawJsonStr = jsonMatch[0].replace(/[\u0000-\u0009\u000B-\u001F]/g, ""); 
+            
+            let resultData;
+            try {
+                resultData = JSON.parse(rawJsonStr);
+            } catch (parseError) {
+                console.log("原始回傳字串：", rawJsonStr);
+                throw new Error("AI 生成的文章格式出現不合法的換行符號，導致解析失敗。請再按一次「提前完成」重試！");
+            }
 
-            // 1️⃣ 渲染文字內容 (評語與範文)
+            // 渲染文字內容
             document.getElementById('result-content').innerHTML = marked.parse(resultData.feedback);
             document.getElementById('model-essay-content').innerHTML = marked.parse(resultData.modelEssay);
 
-            // 2️⃣ 繪製總分儀表板 (SVG)
+            // 繪製總分儀表板
             document.getElementById('score-text').innerText = resultData.overallScore;
             const gaugeCircle = document.getElementById('score-gauge');
-            const gaugeCircumference = 502.65; // 2 * PI * 80
-            // 數學轉換：滿分 9 分為滿圓。例：7分 = (7/9)*360度
+            const gaugeCircumference = 502.65; 
             const percent = resultData.overallScore / 9.0;
             const offset = gaugeCircumference - (percent * gaugeCircumference);
-            // 為了讓動畫生效，先稍微延遲再設定 offset
             setTimeout(() => { gaugeCircle.style.strokeDashoffset = offset; }, 100);
 
-            // 3️⃣ 繪製雷達圖 (Chart.js)
-            if (myRadarChart) myRadarChart.destroy(); // 避免重疊繪製
+            // 繪製雷達圖
+            if (myRadarChart) myRadarChart.destroy(); 
             const ctx = document.getElementById('radarChart').getContext('2d');
             const trLabel = taskType === "1" ? "Task Achievement" : "Task Response";
             
@@ -464,7 +476,6 @@
                 }
             });
 
-            // 顯示結果區塊
             document.getElementById('result-container').style.display = 'block';
 
         } catch (error) {
