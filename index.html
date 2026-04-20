@@ -43,7 +43,7 @@
             margin-bottom: 8px;
             color: var(--secondary-color);
         }
-        input[type="password"], textarea, select {
+        input[type="password"], input[type="file"], textarea, select {
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
@@ -92,6 +92,21 @@
             display: none;
         }
 
+        /* 題目顯示區 (作答時的參考區塊) */
+        .topic-display-box {
+            background-color: #f8fbfa;
+            border-left: 5px solid var(--secondary-color);
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 0 6px 6px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .topic-display-box h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+
         /* 圓形計時器樣式 */
         .timer-container {
             display: flex;
@@ -114,7 +129,6 @@
             stroke-width: 8;
             stroke-linecap: round;
             fill: transparent;
-            /* 圓周長預設值，會在 JS 動態計算 */
             stroke-dasharray: 326.726; 
             stroke-dashoffset: 0;
             transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
@@ -164,21 +178,34 @@
 
         <div class="form-group">
             <label for="taskType">⏳ 選擇寫作任務 (決定計時長度)</label>
-            <select id="taskType">
+            <select id="taskType" onchange="toggleImageUpload()">
                 <option value="1">Task 1 (圖表/書信) - 20 分鐘</option>
                 <option value="2">Task 2 (論說文) - 40 分鐘</option>
             </select>
         </div>
 
+        <div class="form-group" id="image-upload-group">
+            <label for="taskImage">📊 上傳圖表照片 (選填)</label>
+            <input type="file" id="taskImage" accept="image/png, image/jpeg, image/jpg, image/webp">
+            <img id="setup-image-preview" src="" alt="圖表預覽" style="display:none; max-width: 100%; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc;">
+            <div class="note">✨ 系統會自動啟動 Command A Vision 視覺模型，讓 AI 實際判讀你的圖表資料並核對作文準確度。</div>
+        </div>
+
         <div class="form-group">
-            <label for="topic">📌 寫作題目</label>
-            <textarea id="topic" rows="3" placeholder="請先在此貼上題目..."></textarea>
+            <label for="topic">📌 寫作題目文字</label>
+            <textarea id="topic" rows="3" placeholder="請在此貼上完整的題目敘述 (例如：The chart below shows...)"></textarea>
         </div>
 
         <button onclick="startSimulation()">🚀 準備好了，開始計時寫作！</button>
     </div>
 
     <div id="writing-section">
+        <div class="topic-display-box">
+            <h3>📖 題目與圖表</h3>
+            <div id="writing-topic-text" style="white-space: pre-wrap; font-size: 15px; margin-bottom: 10px;"></div>
+            <img id="writing-topic-image" src="" alt="題目圖表" style="display:none; max-width: 100%; border-radius: 6px; border: 1px solid #ccc;">
+        </div>
+
         <div class="timer-container">
             <svg class="progress-ring">
                 <circle class="progress-ring__circle-bg" cx="60" cy="60" r="52"></circle>
@@ -188,14 +215,14 @@
         </div>
 
         <div class="form-group">
-            <label for="essay">✍️ 你的作文 (考試開始)</label>
+            <label for="essay">✍️ 你的作文</label>
             <textarea id="essay" rows="15" placeholder="時間緊迫，開始寫作吧！..."></textarea>
         </div>
 
         <button id="submitBtn" class="submit-btn" onclick="submitEssay(false)">提前完成，繳交評估</button>
     </div>
 
-    <div id="loader" class="loader">⏳ 時間到！Cohere Command A 正在為您仔細批改中，請稍候...</div>
+    <div id="loader" class="loader">⏳ 時間到！Cohere 正在為您仔細批改中，請稍候...</div>
 
     <div id="result-container">
         <h2 style="margin-top: 0; color: var(--secondary-color);">🏆 評估報告</h2>
@@ -204,11 +231,45 @@
 </div>
 
 <script>
+    // === 圖片上傳與預覽邏輯 ===
+    window.onload = function() {
+        toggleImageUpload();
+    };
+
+    function toggleImageUpload() {
+        const taskType = document.getElementById('taskType').value;
+        const imageGroup = document.getElementById('image-upload-group');
+        
+        if (taskType === "1") {
+            imageGroup.style.display = 'block';
+        } else {
+            imageGroup.style.display = 'none';
+            document.getElementById('taskImage').value = '';
+            document.getElementById('setup-image-preview').style.display = 'none';
+            document.getElementById('setup-image-preview').src = '';
+            document.getElementById('writing-topic-image').src = '';
+        }
+    }
+
+    document.getElementById('taskImage').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const setupPreview = document.getElementById('setup-image-preview');
+                setupPreview.src = event.target.result;
+                setupPreview.style.display = 'block';
+                document.getElementById('writing-topic-image').src = event.target.result;
+            }
+            reader.readAsDataURL(file); // 這裡會轉換成 Base64 格式
+        }
+    });
+
+    // === 計時器邏輯 ===
     let timerInterval;
     let totalSeconds;
     let remainingSeconds;
 
-    // SVG 圓環的設定
     const circle = document.getElementById('timer-circle');
     const radius = circle.r.baseVal.value;
     const circumference = radius * 2 * Math.PI;
@@ -220,74 +281,75 @@
         circle.style.strokeDashoffset = offset;
     }
 
-    // 格式化時間 (MM:SS)
     function formatTime(seconds) {
         const m = Math.floor(seconds / 60).toString().padStart(2, '0');
         const s = (seconds % 60).toString().padStart(2, '0');
         return `${m}:${s}`;
     }
 
-    // 開始測驗
     function startSimulation() {
         const apiKey = document.getElementById('apiKey').value.trim();
         const topic = document.getElementById('topic').value.trim();
         
         if (!apiKey || !topic) {
-            alert("⚠️ 請確保 API Key 和 寫作題目 都已填寫！");
+            alert("⚠️ 請確保 API Key 和 寫作題目文字 都已填寫！");
             return;
         }
 
-        // 取得時間設定 (Task 1 = 20分, Task 2 = 40分)
+        document.getElementById('writing-topic-text').innerText = topic;
+
+        const writingImage = document.getElementById('writing-topic-image');
+        if (writingImage.getAttribute('src')) {
+            writingImage.style.display = 'block';
+        } else {
+            writingImage.style.display = 'none';
+        }
+
         const taskType = document.getElementById('taskType').value;
         totalSeconds = taskType === "1" ? 20 * 60 : 40 * 60;
         
-        // **測試用：如果你想看動畫效果，可以把上面那行註解掉，換成下面這行 (5秒倒數)**
+        // 測試用：把下一行註解拿掉，倒數 5 秒就會自動交卷
         // totalSeconds = 5;
 
         remainingSeconds = totalSeconds;
 
-        // UI 切換
         document.getElementById('setup-section').style.display = 'none';
         document.getElementById('writing-section').style.display = 'block';
         
-        // 初始化計時器 UI
         document.getElementById('timer-text').innerText = formatTime(remainingSeconds);
-        circle.style.stroke = "var(--secondary-color)"; // 預設墨綠色
+        circle.style.stroke = "var(--secondary-color)"; 
 
-        // 開始倒數
         timerInterval = setInterval(() => {
             remainingSeconds--;
             
-            // 更新文字與圓環進度
             document.getElementById('timer-text').innerText = formatTime(remainingSeconds);
             const percent = (remainingSeconds / totalSeconds) * 100;
             setProgress(percent);
 
-            // 最後 5 分鐘 (300秒) 時把圓環變紅色警告
             if (remainingSeconds <= 300) {
                 circle.style.stroke = "var(--danger-color)";
             }
 
-            // 時間到
             if (remainingSeconds <= 0) {
                 clearInterval(timerInterval);
-                submitEssay(true); // true 代表是時間到自動繳交
+                submitEssay(true); 
             }
         }, 1000);
     }
 
-    // 繳交並呼叫 API
+    // === API 呼叫與多模態處理 ===
     async function submitEssay(isAutoSubmit) {
-        // 停止計時器
         clearInterval(timerInterval);
 
         const apiKey = document.getElementById('apiKey').value.trim();
         const topic = document.getElementById('topic').value.trim();
         const essay = document.getElementById('essay').value.trim();
+        const taskType = document.getElementById('taskType').value;
+        const writingImage = document.getElementById('writing-topic-image');
+        const imageSrc = writingImage.getAttribute('src');
         
         if (!essay && !isAutoSubmit) {
             alert("⚠️ 你還沒寫任何內容喔！");
-            // 恢復計時 (如果只是按錯提前交卷)
             return;
         }
 
@@ -298,17 +360,19 @@
             if (!confirmSubmit) return;
         }
 
-        // 鎖定 UI
         document.getElementById('essay').disabled = true;
         document.getElementById('submitBtn').disabled = true;
         document.getElementById('loader').style.display = 'block';
         document.getElementById('result-container').style.display = 'none';
         document.getElementById('result-content').innerHTML = '';
 
+        // 提示詞設計：如果有圖片，特別指示 AI 檢查數據準確度
         const promptText = `
         You are an expert IELTS Writing Examiner. 
         The student is answering the following IELTS Writing prompt:
         "${topic}"
+        
+        ${(taskType === "1" && imageSrc) ? "An image/chart related to this task is attached to this message. Please analyze the visual data carefully to verify if the student has accurately reported the key features and data points in their essay." : ""}
         
         Here is the student's essay (submitted under timed exam conditions):
         "${essay || '(Student submitted a blank paper)'}"
@@ -316,10 +380,30 @@
         Please evaluate the essay based on the official IELTS Writing band descriptors.
         Your evaluation must include:
         1. Estimated Overall Band Score.
-        2. Score breakdown and feedback for the four criteria.
+        2. Score breakdown and feedback for the four criteria (Task Achievement/Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy).
         3. Specific corrections for grammatical or vocabulary errors (quote the original text and provide the corrected version).
         4. Actionable suggestions for how to improve the essay to reach Band 8.0 or higher.
         `;
+
+        // 初始化 API 的 message 結構 (陣列格式以支援多模態)
+        let messagesContent = [
+            { "type": "text", "text": promptText }
+        ];
+
+        // 預設為純文字模型
+        let currentModel = 'command-a-03-2025';
+
+        // 如果是 Task 1 且有上傳圖片，切換到 Vision 模型並把圖片放入 Request 中
+        if (taskType === "1" && imageSrc && imageSrc.startsWith('data:image')) {
+            currentModel = 'command-a-vision-07-2025'; // Cohere 多模態視覺模型
+            messagesContent.push({
+                "type": "image_url",
+                "image_url": { "url": imageSrc }
+            });
+            console.log("已啟動 Command A Vision 多模態模型進行評分");
+        } else {
+            console.log("已啟動 Command A 語言模型進行評分");
+        }
 
         const apiUrl = "https://api.cohere.com/v2/chat";
         
@@ -332,8 +416,13 @@
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'command-a-03-2025', 
-                    messages: [{ role: "user", content: promptText }]
+                    model: currentModel, 
+                    messages: [
+                        { 
+                            role: "user", 
+                            content: messagesContent 
+                        }
+                    ]
                 })
             });
 
@@ -350,8 +439,8 @@
         } catch (error) {
             console.error("API 錯誤詳情:", error);
             alert(`❌ 發生錯誤：\n${error.message}`);
-            // 出錯時恢復按鈕讓使用者可以重試
             document.getElementById('submitBtn').disabled = false;
+            document.getElementById('essay').disabled = false;
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
