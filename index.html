@@ -152,6 +152,10 @@
             border-radius: 6px; border: 1px solid #d1e0d9;
             margin-bottom: 20px;
         }
+        /* 讓文字區塊內的行距和段落更清楚 */
+        .feedback-box p, .feedback-box ul, .model-essay-box p {
+            margin-bottom: 1em;
+        }
         
         /* 範文區塊樣式 */
         .model-essay-box {
@@ -253,6 +257,12 @@
 </div>
 
 <script>
+    // 🌟 設定 Marked.js：允許單一換行符號 (\n) 直接轉成換行 (<br>)
+    marked.use({
+        breaks: true,
+        gfm: true
+    });
+
     let myRadarChart = null; 
 
     // === 圖片上傳與預覽邏輯 ===
@@ -364,7 +374,7 @@
         document.getElementById('loader').style.display = 'block';
         document.getElementById('result-container').style.display = 'none';
 
-        // 🌟 更新版 Prompt：嚴格防堵 JSON 換行字元錯誤
+        // 🌟 更新版 Prompt：要求 AI 使用雙換行 (\n\n) 以及條列式排版
         const promptText = `
         You are an expert IELTS Examiner. Evaluate the following IELTS Task ${taskType} essay.
         Topic: "${topic}"
@@ -385,8 +395,8 @@
           "CC": 8.0,
           "LR": 7.0,
           "GRA": 8.0,
-          "feedback": "Write your detailed evaluation in Markdown format here. Remember to use \\n for paragraph breaks instead of pressing Enter.",
-          "modelEssay": "Write a complete Band 9 model essay here. Remember to use \\n for paragraph breaks."
+          "feedback": "Write your detailed evaluation in Markdown format here. IMPORTANT: Use \\n\\n to clearly separate different paragraphs and criteria. Use bullet points for specific corrections.",
+          "modelEssay": "Write a complete Band 9 model essay here. IMPORTANT: Use \\n\\n for clear paragraph breaks."
         }
         `;
 
@@ -423,7 +433,7 @@
             const jsonMatch = aiText.match(/\{[\s\S]*\}/);
             if (!jsonMatch) throw new Error("AI 回傳格式異常，無法繪製圖表。請重新評估一次。");
             
-            // 🌟 清洗字串：濾除導致 JSON.parse 崩潰的隱藏控制字元
+            // 清洗字串：濾除導致 JSON.parse 崩潰的隱藏控制字元
             let rawJsonStr = jsonMatch[0].replace(/[\u0000-\u0009\u000B-\u001F]/g, ""); 
             
             let resultData;
@@ -434,7 +444,7 @@
                 throw new Error("AI 生成的文章格式出現不合法的換行符號，導致解析失敗。請再按一次「提前完成」重試！");
             }
 
-            // 渲染文字內容
+            // 渲染文字內容 (這時有加入 breaks: true 設定，換行會更漂亮)
             document.getElementById('result-content').innerHTML = marked.parse(resultData.feedback);
             document.getElementById('model-essay-content').innerHTML = marked.parse(resultData.modelEssay);
 
