@@ -108,7 +108,7 @@
     <div class="form-group">
         <label for="apiKey">🔑 Cohere API Key (Trial Key)</label>
         <input type="password" id="apiKey" placeholder="請貼上你的 API Key">
-        <div class="note">✅ 使用最新的 Cohere V2 API 進行連線。</div>
+        <div class="note">✅ 使用最新的 Cohere V2 API 與 Command A 模型。</div>
     </div>
 
     <div class="form-group">
@@ -123,7 +123,7 @@
 
     <button id="submitBtn" onclick="evaluateEssay()">呼叫 Cohere 開始評估</button>
 
-    <div id="loader" class="loader">⏳ Cohere Command R 正在仔細批改中，請稍候約 10-20 秒...</div>
+    <div id="loader" class="loader">⏳ Cohere Command A 正在仔細批改中，請稍候約 10-20 秒...</div>
 
     <div id="result-container">
         <h2 style="margin-top: 0; color: var(--secondary-color);">🏆 評估報告</h2>
@@ -167,7 +167,6 @@
         4. Actionable suggestions for how to improve the essay to reach Band 8.0 or higher.
         `;
 
-        // 🌟 更新為 Cohere 最新的 V2 端點
         const apiUrl = "https://api.cohere.com/v2/chat";
         
         try {
@@ -178,9 +177,9 @@
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 },
-                // 🌟 更新為 V2 所需的 payload 結構
                 body: JSON.stringify({
-                    model: 'command-r', // 若要測試最強版本，也可改為 'command-r-plus'
+                    // 🌟 這裡已經換成 Cohere 最新的 Command A 模型
+                    model: 'command-a-03-2025', 
                     messages: [
                         {
                             role: "user",
@@ -196,7 +195,6 @@
                 throw new Error(data.message || `連線錯誤，狀態碼：${response.status}`);
             }
 
-            // 🌟 解析 Cohere V2 的回傳結構
             const aiText = data.message.content[0].text;
             resultContent.innerHTML = marked.parse(aiText);
             resultContainer.style.display = 'block';
