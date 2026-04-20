@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IELTS Writing AI Evaluator (Cohere Version)</title>
+    <title>IELTS Writing AI Evaluator (Cohere V2)</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --primary-color: #1a1a1a;
-            --secondary-color: #39594d; /* Cohere 的墨綠色調 */
+            --secondary-color: #39594d;
             --bg-color: #f4f4f4;
         }
         body {
@@ -92,7 +92,6 @@
             font-weight: bold;
             color: var(--secondary-color);
         }
-        /* 讓標籤裡面的程式碼區塊好看一點 */
         pre {
             background-color: #e8ecea;
             padding: 10px;
@@ -108,8 +107,8 @@
     
     <div class="form-group">
         <label for="apiKey">🔑 Cohere API Key (Trial Key)</label>
-        <input type="password" id="apiKey" placeholder="請貼上你的 API Key (通常是不含特殊符號的一串英數)">
-        <div class="note">✅ Cohere 提供免費的 Trial Key，無需綁定信用卡即可使用。</div>
+        <input type="password" id="apiKey" placeholder="請貼上你的 API Key">
+        <div class="note">✅ 使用最新的 Cohere V2 API 進行連線。</div>
     </div>
 
     <div class="form-group">
@@ -147,7 +146,6 @@
             return;
         }
 
-        // 切換 UI 狀態
         submitBtn.disabled = true;
         loader.style.display = 'block';
         resultContainer.style.display = 'none';
@@ -169,40 +167,44 @@
         4. Actionable suggestions for how to improve the essay to reach Band 8.0 or higher.
         `;
 
-        const apiUrl = "https://api.cohere.com/v1/chat";
+        // 🌟 更新為 Cohere 最新的 V2 端點
+        const apiUrl = "https://api.cohere.com/v2/chat";
         
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
-                    'accept': 'application/json',
-                    'content-type': 'application/json',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 },
+                // 🌟 更新為 V2 所需的 payload 結構
                 body: JSON.stringify({
-                    // 🌟 已經將模型改為 command-r，對免費 Key 比較穩定且不容易超過限制
-                    model: 'command-r', 
-                    message: promptText
+                    model: 'command-r', // 若要測試最強版本，也可改為 'command-r-plus'
+                    messages: [
+                        {
+                            role: "user",
+                            content: promptText
+                        }
+                    ]
                 })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                // 將 API 原始錯誤訊息拋出，方便辨識原因
-                throw new Error(data.message || "未知的 API 錯誤");
+                throw new Error(data.message || `連線錯誤，狀態碼：${response.status}`);
             }
 
-            // 解析 Cohere 回傳格式
-            const aiText = data.text;
+            // 🌟 解析 Cohere V2 的回傳結構
+            const aiText = data.message.content[0].text;
             resultContent.innerHTML = marked.parse(aiText);
             resultContainer.style.display = 'block';
 
         } catch (error) {
             console.error("API 錯誤詳情:", error);
-            alert(`❌ 發生錯誤：\n${error.message}\n\n💡 提示：如果是 Trial Key，請確認沒有複製到多餘空白，或稍等 1 分鐘後再試一次（避免觸發頻率限制）。`);
+            alert(`❌ 發生錯誤：\n${error.message}`);
         } finally {
-            // 恢復按鈕與隱藏載入中提示
             submitBtn.disabled = false;
             loader.style.display = 'none';
         }
