@@ -169,7 +169,7 @@
 <body>
 
 <div class="container">
-    <h1>📝 IELTS Writing Simulator</h1>
+    <h1>📝 IELTS Writing Practice</h1>
     
     <div id="setup-section">
         <div class="form-group">
@@ -180,8 +180,8 @@
         <div class="form-group">
             <label for="taskType">⏳ 選擇寫作任務</label>
             <select id="taskType" onchange="toggleImageUpload()">
-                <option value="1">Task 1 (圖表/書信) - 20 分鐘</option>
-                <option value="2">Task 2 (論說文) - 40 分鐘</option>
+                <option value="1">Task 1  - 20 min</option>
+                <option value="2">Task 2  - 40 min</option>
             </select>
         </div>
 
@@ -196,14 +196,14 @@
             <textarea id="topic" rows="3" placeholder="請在此貼上完整的題目敘述 (例如：The chart below shows...)"></textarea>
         </div>
 
-        <button onclick="startSimulation()">🚀 準備好了，開始計時寫作！</button>
+        <button onclick="startSimulation()">🚀 Start</button>
     </div>
 
     <div id="writing-section">
         <div class="topic-display-box">
-            <h3>📖 題目與圖表</h3>
+            <h3>📖 question and charts</h3>
             <div id="writing-topic-text" style="white-space: pre-wrap; font-size: 15px; margin-bottom: 10px;"></div>
-            <img id="writing-topic-image" src="" alt="題目圖表" style="display:none; max-width: 100%; border-radius: 6px; border: 1px solid #ccc;">
+            <img id="writing-topic-image" src="" alt="charts" style="display:none; max-width: 100%; border-radius: 6px; border: 1px solid #ccc;">
         </div>
 
         <div class="timer-container">
@@ -215,17 +215,17 @@
         </div>
 
         <div class="form-group">
-            <label for="essay">✍️ 你的作文</label>
-            <textarea id="essay" rows="15" placeholder="時間緊迫，開始寫作吧！..."></textarea>
+            <label for="essay">✍️ Your answer</label>
+            <textarea id="essay" rows="15" placeholder="Take your time！..."></textarea>
         </div>
 
-        <button id="submitBtn" class="submit-btn" onclick="submitEssay(false)">提前完成，繳交評估</button>
+        <button id="submitBtn" class="submit-btn" onclick="submitEssay(false)">finish</button>
     </div>
 
-    <div id="loader" class="loader">⏳ 正在為您生成精準報表與 Band 9 範文中，請稍候...</div>
+    <div id="loader" class="loader">⏳ scroing and generating...</div>
 
     <div id="result-container">
-        <h2 style="margin-top: 0; text-align: center; color: var(--secondary-color);">🏆 寫作評估報告</h2>
+        <h2 style="margin-top: 0; text-align: center; color: var(--secondary-color);">🏆 score & comment</h2>
         
         <div class="dashboard" id="dashboard-section">
             <div class="gauge-container">
