@@ -92,6 +92,13 @@
             font-weight: bold;
             color: var(--secondary-color);
         }
+        /* 讓標籤裡面的程式碼區塊好看一點 */
+        pre {
+            background-color: #e8ecea;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
@@ -117,7 +124,7 @@
 
     <button id="submitBtn" onclick="evaluateEssay()">呼叫 Cohere 開始評估</button>
 
-    <div id="loader" class="loader">⏳ Cohere Command R+ 正在仔細批改中，請稍候約 10-20 秒...</div>
+    <div id="loader" class="loader">⏳ Cohere Command R 正在仔細批改中，請稍候約 10-20 秒...</div>
 
     <div id="result-container">
         <h2 style="margin-top: 0; color: var(--secondary-color);">🏆 評估報告</h2>
@@ -140,6 +147,7 @@
             return;
         }
 
+        // 切換 UI 狀態
         submitBtn.disabled = true;
         loader.style.display = 'block';
         resultContainer.style.display = 'none';
@@ -169,10 +177,11 @@
                 headers: {
                     'accept': 'application/json',
                     'content-type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}` // Cohere 使用 Bearer Token 驗證
+                    'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'command-r-plus', // 使用 Cohere 最強的模型
+                    // 🌟 已經將模型改為 command-r，對免費 Key 比較穩定且不容易超過限制
+                    model: 'command-r', 
                     message: promptText
                 })
             });
@@ -180,18 +189,20 @@
             const data = await response.json();
 
             if (!response.ok) {
-                // 如果 API Key 錯誤或超過免費額度，會在這裡攔截
+                // 將 API 原始錯誤訊息拋出，方便辨識原因
                 throw new Error(data.message || "未知的 API 錯誤");
             }
 
-            // 解析 Cohere 的回傳格式 (直接放在 data.text 裡)
+            // 解析 Cohere 回傳格式
             const aiText = data.text;
             resultContent.innerHTML = marked.parse(aiText);
             resultContainer.style.display = 'block';
 
         } catch (error) {
-            alert(`❌ 發生錯誤：\n${error.message}\n\n可能原因：API Key 錯誤，或是 Trial Key 的免費請求頻率過快（每分鐘限幾次）。`);
+            console.error("API 錯誤詳情:", error);
+            alert(`❌ 發生錯誤：\n${error.message}\n\n💡 提示：如果是 Trial Key，請確認沒有複製到多餘空白，或稍等 1 分鐘後再試一次（避免觸發頻率限制）。`);
         } finally {
+            // 恢復按鈕與隱藏載入中提示
             submitBtn.disabled = false;
             loader.style.display = 'none';
         }
