@@ -312,7 +312,7 @@
         document.getElementById('loader').style.display = 'block';
         document.getElementById('result-container').style.display = 'none';
 
-        // 🌟 提示詞新增：強制要求 AI 給出四項評分標準的個別評語
+        // 🌟 更新提示詞：要求必須精準給予 .5 的分數，並更改範例
         const promptText = `
         You are an expert IELTS Examiner. Evaluate this IELTS Task ${taskType} essay.
         Topic: "${topic}"
@@ -322,14 +322,15 @@
         1. You MUST respond strictly with a valid JSON object. 
         2. DO NOT return JSON arrays for text fields. All text fields MUST be a single String.
         3. Use Markdown formatting inside the strings to create bulleted lists. 
+        4. All scores (overallScore, TR, CC, LR, GRA) MUST be numbers and can be in half-band increments (e.g., 6.0, 6.5, 7.0, 7.5, 8.0).
 
         Required JSON structure:
         {
           "overallScore": 7.5,
-          "TR": 7.0,
+          "TR": 7.5,
           "CC": 8.0,
-          "LR": 7.0,
-          "GRA": 8.0,
+          "LR": 6.5,
+          "GRA": 7.5,
           "feedbackTR": "String: Specific feedback explaining the score for Task Response / Achievement.",
           "feedbackCC": "String: Specific feedback explaining the score for Coherence and Cohesion.",
           "feedbackLR": "String: Specific feedback explaining the score for Lexical Resource.",
@@ -346,7 +347,8 @@
         let requestBody = {
             model: currentModel,
             messages: [{ role: "user", content: messagesContent }],
-            response_format: { type: "json_object" }
+            response_format: { type: "json_object" },
+            temperature: 0.2 // 🌟 降低溫度，讓評分標準更一致、不亂飄
         };
 
         if (taskType === "1" && imageSrc && imageSrc.startsWith('data:image')) {
@@ -390,31 +392,30 @@
                 resultData = JSON.parse(jsonMatch[0].replace(/[\u0000-\u001F]/g, ""));
             }
 
-            // 渲染：整體、文法、單字、範文
             document.getElementById('result-content').innerHTML = marked.parse(ensureString(resultData.feedback));
             document.getElementById('grammar-content').innerHTML = marked.parse(ensureString(resultData.grammarCorrections));
             document.getElementById('vocab-content').innerHTML = marked.parse(ensureString(resultData.vocabularySuggestions));
             document.getElementById('model-essay-content').innerHTML = marked.parse(ensureString(resultData.modelEssay));
 
-            // 🌟 渲染：四項獨立指標的標題、分數與評語
+            // 🌟 加入 .toFixed(1)，強制顯示小數點，就算 AI 給 7 也會顯示 7.0
             document.getElementById('label-tr').innerText = taskType === "1" ? "Task Achievement" : "Task Response";
-            document.getElementById('score-tr').innerText = resultData.TR;
-            document.getElementById('score-cc').innerText = resultData.CC;
-            document.getElementById('score-lr').innerText = resultData.LR;
-            document.getElementById('score-gra').innerText = resultData.GRA;
+            document.getElementById('score-tr').innerText = (parseFloat(resultData.TR) || 0).toFixed(1);
+            document.getElementById('score-cc').innerText = (parseFloat(resultData.CC) || 0).toFixed(1);
+            document.getElementById('score-lr').innerText = (parseFloat(resultData.LR) || 0).toFixed(1);
+            document.getElementById('score-gra').innerText = (parseFloat(resultData.GRA) || 0).toFixed(1);
 
             document.getElementById('feedback-tr').innerHTML = marked.parse(ensureString(resultData.feedbackTR));
             document.getElementById('feedback-cc').innerHTML = marked.parse(ensureString(resultData.feedbackCC));
             document.getElementById('feedback-lr').innerHTML = marked.parse(ensureString(resultData.feedbackLR));
             document.getElementById('feedback-gra').innerHTML = marked.parse(ensureString(resultData.feedbackGRA));
 
-            // 🌟 顏色變換邏輯：根據分數 (0~9) 轉換為 HSL 色相 (0~120)
             const finalScore = parseFloat(resultData.overallScore) || 0;
-            const hue = (finalScore / 9.0) * 120; // 0 是紅色, 120 是綠色
+            const hue = (finalScore / 9.0) * 120; 
             const dynamicColor = `hsl(${hue}, 85%, 45%)`;
 
             const scoreTextEl = document.getElementById('score-text');
-            scoreTextEl.innerText = finalScore;
+            // 🌟 總分同樣強制顯示小數點
+            scoreTextEl.innerText = finalScore.toFixed(1);
             scoreTextEl.style.color = dynamicColor;
 
             const scoreGauge = document.getElementById('score-gauge');
@@ -422,7 +423,6 @@
             const gaugeCircumference = 502.65; 
             setTimeout(() => { scoreGauge.style.strokeDashoffset = gaugeCircumference - ((finalScore / 9.0) * gaugeCircumference); }, 100);
 
-            // 雷達圖繪製
             if (myRadarChart) myRadarChart.destroy(); 
             myRadarChart = new Chart(document.getElementById('radarChart').getContext('2d'), {
                 type: 'radar',
