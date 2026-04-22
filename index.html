@@ -78,6 +78,13 @@
         .gauge-text-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .chart-container { width: 300px; height: 300px; }
         
+        /* 四項指標專屬區塊 */
+        .criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .criteria-box { background-color: white; padding: 18px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .criteria-box h4 { margin-top: 0; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 16px;}
+        .criteria-box p, .criteria-box ul { margin-bottom: 0.5em; font-size: 14.5px; }
+        @media (max-width: 650px) { .criteria-grid { grid-template-columns: 1fr; } }
+
         .feedback-box { background-color: #f4f7f6; padding: 20px; border-radius: 6px; border: 1px solid #d1e0d9; margin-bottom: 20px; }
         .grammar-box { background-color: #fdf5f5; padding: 20px; border-radius: 6px; border-left: 5px solid var(--danger-color); margin-bottom: 20px; }
         .vocab-box { background-color: #f4f8fc; padding: 20px; border-radius: 6px; border-left: 5px solid var(--blue-color); margin-bottom: 20px; }
@@ -149,14 +156,33 @@
             <div class="gauge-container">
                 <svg width="200" height="200">
                     <circle cx="100" cy="100" r="80" fill="none" stroke="#e6e6e6" stroke-width="16" />
-                    <circle id="score-gauge" cx="100" cy="100" r="80" fill="none" stroke="var(--secondary-color)" stroke-width="16" stroke-dasharray="502.65" stroke-dashoffset="502.65" stroke-linecap="round" transform="rotate(90 100 100)" style="transition: stroke-dashoffset 1.5s cubic-bezier(0.25, 1, 0.5, 1);" />
+                    <circle id="score-gauge" cx="100" cy="100" r="80" fill="none" stroke-width="16" stroke-dasharray="502.65" stroke-dashoffset="502.65" stroke-linecap="round" transform="rotate(90 100 100)" style="transition: stroke-dashoffset 1.5s cubic-bezier(0.25, 1, 0.5, 1), stroke 1.5s ease;" />
                 </svg>
                 <div class="gauge-text-container">
                     <div style="font-size: 14px; color: #666; font-weight: bold;">OVERALL</div>
-                    <div id="score-text" style="font-size: 42px; font-weight: bold; color: var(--primary-color); line-height: 1;">0.0</div>
+                    <div id="score-text" style="font-size: 42px; font-weight: bold; line-height: 1; transition: color 1.5s ease;">0.0</div>
                 </div>
             </div>
             <div class="chart-container"><canvas id="radarChart"></canvas></div>
+        </div>
+
+        <div class="criteria-grid" id="criteria-breakdown">
+            <div class="criteria-box">
+                <h4 style="color: #d35400;"><span>🎯 <span id="label-tr">Task Response</span></span> <span id="score-tr" style="font-size:1.2em; font-weight:bold;">0.0</span></h4>
+                <div id="feedback-tr"></div>
+            </div>
+            <div class="criteria-box">
+                <h4 style="color: #27ae60;"><span>🔗 Coherence & Cohesion</span> <span id="score-cc" style="font-size:1.2em; font-weight:bold;">0.0</span></h4>
+                <div id="feedback-cc"></div>
+            </div>
+            <div class="criteria-box">
+                <h4 style="color: #2980b9;"><span>📚 Lexical Resource</span> <span id="score-lr" style="font-size:1.2em; font-weight:bold;">0.0</span></h4>
+                <div id="feedback-lr"></div>
+            </div>
+            <div class="criteria-box">
+                <h4 style="color: #8e44ad;"><span>✍️ Grammatical Accuracy</span> <span id="score-gra" style="font-size:1.2em; font-weight:bold;">0.0</span></h4>
+                <div id="feedback-gra"></div>
+            </div>
         </div>
 
         <div class="feedback-box">
@@ -286,15 +312,16 @@
         document.getElementById('loader').style.display = 'block';
         document.getElementById('result-container').style.display = 'none';
 
+        // 🌟 提示詞新增：強制要求 AI 給出四項評分標準的個別評語
         const promptText = `
         You are an expert IELTS Examiner. Evaluate this IELTS Task ${taskType} essay.
         Topic: "${topic}"
         Essay: "${essay || '(Blank paper)'}"
         
         CRITICAL INSTRUCTIONS:
-        You MUST respond strictly with a valid JSON object. 
-        DO NOT return JSON arrays for text fields. All text fields MUST be a single String.
-        Use "\\n\\n" inside strings for line breaks.
+        1. You MUST respond strictly with a valid JSON object. 
+        2. DO NOT return JSON arrays for text fields. All text fields MUST be a single String.
+        3. Use Markdown formatting inside the strings to create bulleted lists. 
 
         Required JSON structure:
         {
@@ -303,9 +330,13 @@
           "CC": 8.0,
           "LR": 7.0,
           "GRA": 8.0,
-          "feedback": "String: General feedback...",
-          "grammarCorrections": "String: List grammar mistakes using bullet points...",
-          "vocabularySuggestions": "String: List words to upgrade using bullet points...",
+          "feedbackTR": "String: Specific feedback explaining the score for Task Response / Achievement.",
+          "feedbackCC": "String: Specific feedback explaining the score for Coherence and Cohesion.",
+          "feedbackLR": "String: Specific feedback explaining the score for Lexical Resource.",
+          "feedbackGRA": "String: Specific feedback explaining the score for Grammatical Accuracy.",
+          "feedback": "String: Provide general overall feedback.",
+          "grammarCorrections": "String: List grammar mistakes using Markdown bullet points.",
+          "vocabularySuggestions": "String: List vocabulary upgrades using Markdown bullet points.",
           "modelEssay": "String: A Band 9 model essay..."
         }
         `;
@@ -348,7 +379,6 @@
             const jsonMatch = aiText.match(/\{[\s\S]*\}/);
             if (!jsonMatch) throw new Error("AI returned an invalid format.");
             
-            // 🌟 修復了語法錯誤：補上了等號 `?=` 以正確執行正則表達式前瞻
             let rawJsonStr = jsonMatch[0]
                 .replace(/[\u0000-\u0009\u000B-\u001F]/g, "") 
                 .replace(/\n(?=([^"]*"[^"]*")*[^"]*$)/g, "\\n");
@@ -360,15 +390,39 @@
                 resultData = JSON.parse(jsonMatch[0].replace(/[\u0000-\u001F]/g, ""));
             }
 
+            // 渲染：整體、文法、單字、範文
             document.getElementById('result-content').innerHTML = marked.parse(ensureString(resultData.feedback));
             document.getElementById('grammar-content').innerHTML = marked.parse(ensureString(resultData.grammarCorrections));
             document.getElementById('vocab-content').innerHTML = marked.parse(ensureString(resultData.vocabularySuggestions));
             document.getElementById('model-essay-content').innerHTML = marked.parse(ensureString(resultData.modelEssay));
 
-            document.getElementById('score-text').innerText = resultData.overallScore;
-            const gaugeCircumference = 502.65; 
-            setTimeout(() => { document.getElementById('score-gauge').style.strokeDashoffset = gaugeCircumference - ((resultData.overallScore / 9.0) * gaugeCircumference); }, 100);
+            // 🌟 渲染：四項獨立指標的標題、分數與評語
+            document.getElementById('label-tr').innerText = taskType === "1" ? "Task Achievement" : "Task Response";
+            document.getElementById('score-tr').innerText = resultData.TR;
+            document.getElementById('score-cc').innerText = resultData.CC;
+            document.getElementById('score-lr').innerText = resultData.LR;
+            document.getElementById('score-gra').innerText = resultData.GRA;
 
+            document.getElementById('feedback-tr').innerHTML = marked.parse(ensureString(resultData.feedbackTR));
+            document.getElementById('feedback-cc').innerHTML = marked.parse(ensureString(resultData.feedbackCC));
+            document.getElementById('feedback-lr').innerHTML = marked.parse(ensureString(resultData.feedbackLR));
+            document.getElementById('feedback-gra').innerHTML = marked.parse(ensureString(resultData.feedbackGRA));
+
+            // 🌟 顏色變換邏輯：根據分數 (0~9) 轉換為 HSL 色相 (0~120)
+            const finalScore = parseFloat(resultData.overallScore) || 0;
+            const hue = (finalScore / 9.0) * 120; // 0 是紅色, 120 是綠色
+            const dynamicColor = `hsl(${hue}, 85%, 45%)`;
+
+            const scoreTextEl = document.getElementById('score-text');
+            scoreTextEl.innerText = finalScore;
+            scoreTextEl.style.color = dynamicColor;
+
+            const scoreGauge = document.getElementById('score-gauge');
+            scoreGauge.style.stroke = dynamicColor;
+            const gaugeCircumference = 502.65; 
+            setTimeout(() => { scoreGauge.style.strokeDashoffset = gaugeCircumference - ((finalScore / 9.0) * gaugeCircumference); }, 100);
+
+            // 雷達圖繪製
             if (myRadarChart) myRadarChart.destroy(); 
             myRadarChart = new Chart(document.getElementById('radarChart').getContext('2d'), {
                 type: 'radar',
