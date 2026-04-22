@@ -261,7 +261,6 @@
         }, 1000);
     }
 
-    // 🌟 防呆處理：把 AI 亂回的陣列強制轉換成字串
     function ensureString(content) {
         if (!content) return "No feedback provided.";
         if (Array.isArray(content)) {
@@ -316,11 +315,9 @@
         let requestBody = {
             model: currentModel,
             messages: [{ role: "user", content: messagesContent }],
-            // 🌟 強制啟用 JSON 模式，大幅降低 Control Character 換行報錯機率
             response_format: { type: "json_object" }
         };
 
-        // 🌟 強化版圖片格式處理，確保嚴格符合 Cohere 規範
         if (taskType === "1" && imageSrc && imageSrc.startsWith('data:image')) {
             let cleanImageSrc = imageSrc.replace('image/jpg', 'image/jpeg');
             const mimeMatch = cleanImageSrc.match(/^data:(image\/(png|jpeg|webp|gif));base64,(.+)$/);
@@ -335,7 +332,6 @@
             requestBody.model = currentModel;
             messagesContent.push({ "type": "image_url", "image_url": { "url": cleanImageSrc } });
             
-            // 註：有些 Vision 模型可能不支援 JSON Mode，如果在 Vision 模式下報錯可考慮移除 response_format
             delete requestBody.response_format; 
         }
 
@@ -352,20 +348,18 @@
             const jsonMatch = aiText.match(/\{[\s\S]*\}/);
             if (!jsonMatch) throw new Error("AI returned an invalid format.");
             
-            // 🌟 粗暴且安全的 JSON 字串清洗，過濾不合法字元與真實換行
+            // 🌟 修復了語法錯誤：補上了等號 `?=` 以正確執行正則表達式前瞻
             let rawJsonStr = jsonMatch[0]
                 .replace(/[\u0000-\u0009\u000B-\u001F]/g, "") 
-                .replace(/\n(?([^"]*"[^"]*")*[^"]*$)/g, "\\n"); // 嘗試修復未逸出的換行 (以防萬一)
+                .replace(/\n(?=([^"]*"[^"]*")*[^"]*$)/g, "\\n");
             
             let resultData;
             try {
                 resultData = JSON.parse(rawJsonStr);
             } catch (e) {
-                // 如果正則修復失敗，退回使用原始匹配
                 resultData = JSON.parse(jsonMatch[0].replace(/[\u0000-\u001F]/g, ""));
             }
 
-            // 🌟 呼叫 ensureString 確保 marked.js 不會因為收到 Array 而崩潰
             document.getElementById('result-content').innerHTML = marked.parse(ensureString(resultData.feedback));
             document.getElementById('grammar-content').innerHTML = marked.parse(ensureString(resultData.grammarCorrections));
             document.getElementById('vocab-content').innerHTML = marked.parse(ensureString(resultData.vocabularySuggestions));
