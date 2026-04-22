@@ -13,6 +13,7 @@
             --danger-color: #c0392b;
             --bg-color: #f4f4f4;
             --gold-color: #d4af37;
+            --blue-color: #2980b9;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -147,21 +148,34 @@
         }
         .chart-container { width: 300px; height: 300px; }
         
+        /* 各類回饋區塊樣式 */
         .feedback-box {
             background-color: #f4f7f6; padding: 20px;
             border-radius: 6px; border: 1px solid #d1e0d9;
             margin-bottom: 20px;
         }
-        /* 讓文字區塊內的行距和段落更清楚 */
-        .feedback-box p, .feedback-box ul, .model-essay-box p {
-            margin-bottom: 1em;
+        .grammar-box {
+            background-color: #fdf5f5; padding: 20px;
+            border-radius: 6px; border-left: 5px solid var(--danger-color);
+            margin-bottom: 20px;
         }
-        
-        /* 範文區塊樣式 */
+        .vocab-box {
+            background-color: #f4f8fc; padding: 20px;
+            border-radius: 6px; border-left: 5px solid var(--blue-color);
+            margin-bottom: 20px;
+        }
         .model-essay-box {
             background-color: #fff9e6; padding: 20px;
             border-radius: 6px; border-left: 5px solid var(--gold-color);
-            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* 讓文字區塊內的行距和段落更清楚 */
+        .feedback-box p, .feedback-box ul, 
+        .grammar-box p, .grammar-box ul,
+        .vocab-box p, .vocab-box ul,
+        .model-essay-box p {
+            margin-bottom: 1em;
         }
         pre { background-color: #e8ecea; padding: 10px; border-radius: 4px; overflow-x: auto; }
     </style>
@@ -174,7 +188,7 @@
     <div id="setup-section">
         <div class="form-group">
             <label for="apiKey">Cohere API Key</label>
-            <input type="password" id="apiKey" placeholder="please paste your API Key">
+            <input type="password" id="apiKey" placeholder="Please paste your API Key">
         </div>
 
         <div class="form-group">
@@ -186,22 +200,22 @@
         </div>
 
         <div class="form-group" id="image-upload-group">
-            <label for="taskImage">charts:</label>
+            <label for="taskImage">Charts / Images:</label>
             <input type="file" id="taskImage" accept="image/png, image/jpeg, image/jpg, image/webp">
-            <img id="setup-image-preview" src="" alt="圖表預覽" style="display:none; max-width: 100%; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc;">
+            <img id="setup-image-preview" src="" alt="Image Preview" style="display:none; max-width: 100%; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc;">
         </div>
 
         <div class="form-group">
-            <label for="topic">problem statement</label>
-            <textarea id="topic" rows="3" placeholder="please paste your problem ststement here (eg：The chart below shows...)"></textarea>
+            <label for="topic">Question / Prompt</label>
+            <textarea id="topic" rows="3" placeholder="Please paste your question prompt here (e.g., The chart below shows...)"></textarea>
         </div>
 
-        <button onclick="startSimulation()">Start</button>
+        <button onclick="startSimulation()">Start Timer</button>
     </div>
 
     <div id="writing-section">
         <div class="topic-display-box">
-            <h3>📖 question and charts</h3>
+            <h3>📖 Question and Charts</h3>
             <div id="writing-topic-text" style="white-space: pre-wrap; font-size: 15px; margin-bottom: 10px;"></div>
             <img id="writing-topic-image" src="" alt="charts" style="display:none; max-width: 100%; border-radius: 6px; border: 1px solid #ccc;">
         </div>
@@ -215,17 +229,17 @@
         </div>
 
         <div class="form-group">
-            <label for="essay">Your essay</label>
-            <textarea id="essay" rows="15" placeholder="Take your time！..."></textarea>
+            <label for="essay">Your Essay</label>
+            <textarea id="essay" rows="15" placeholder="Start writing your essay here..."></textarea>
         </div>
 
-        <button id="submitBtn" class="submit-btn" onclick="submitEssay(false)">finish</button>
+        <button id="submitBtn" class="submit-btn" onclick="submitEssay(false)">Finish & Submit</button>
     </div>
 
-    <div id="loader" class="loader">⏳ scroing and generating...</div>
+    <div id="loader" class="loader">⏳ Scoring and generating feedback...</div>
 
     <div id="result-container">
-        <h2 style="margin-top: 0; text-align: center; color: var(--secondary-color);">🏆 score & comment</h2>
+        <h2 style="margin-top: 0; text-align: center; color: var(--secondary-color);">🏆 Score & Feedback</h2>
         
         <div class="dashboard" id="dashboard-section">
             <div class="gauge-container">
@@ -247,10 +261,23 @@
             </div>
         </div>
 
-        <div class="feedback-box" id="result-content"></div>
+        <div class="feedback-box">
+            <h3 style="margin-top: 0; color: var(--secondary-color);">📊 General Feedback</h3>
+            <div id="result-content"></div>
+        </div>
+
+        <div class="grammar-box">
+            <h3 style="margin-top: 0; color: var(--danger-color);">🔍 Grammar & Spelling Corrections</h3>
+            <div id="grammar-content"></div>
+        </div>
+
+        <div class="vocab-box">
+            <h3 style="margin-top: 0; color: var(--blue-color);">💡 Vocabulary Enhancement (Synonyms)</h3>
+            <div id="vocab-content"></div>
+        </div>
         
         <div class="model-essay-box">
-            <h3 style="margin-top: 0; color: var(--gold-color);">AI-generated essay</h3>
+            <h3 style="margin-top: 0; color: var(--gold-color);">✨ AI-Generated Model Essay</h3>
             <div id="model-essay-content"></div>
         </div>
     </div>
@@ -322,7 +349,7 @@
         const topic = document.getElementById('topic').value.trim();
         
         if (!apiKey || !topic) {
-            alert("⚠️ 請確保 API Key 和 寫作題目文字 都已填寫！");
+            alert("⚠️ Please ensure both API Key and Prompt are filled in!");
             return;
         }
 
@@ -365,16 +392,16 @@
         const taskType = document.getElementById('taskType').value;
         const imageSrc = document.getElementById('writing-topic-image').getAttribute('src');
         
-        if (!essay && !isAutoSubmit) { alert("⚠️ Not attempted"); return; }
-        if (isAutoSubmit) { alert("⏰ Time's up.。"); } 
-        else { if (!confirm("Confirm submittingyour essay？")) return; }
+        if (!essay && !isAutoSubmit) { alert("⚠️ Essay is empty. Please write something before submitting."); return; }
+        if (isAutoSubmit) { alert("⏰ Time's up!"); } 
+        else { if (!confirm("Are you sure you want to submit your essay?")) return; }
 
         document.getElementById('essay').disabled = true;
         document.getElementById('submitBtn').disabled = true;
         document.getElementById('loader').style.display = 'block';
         document.getElementById('result-container').style.display = 'none';
 
-        // 🌟 更新版 Prompt：要求 AI 使用雙換行 (\n\n) 以及條列式排版
+        // 🌟 更新版 Prompt：加入了 grammarCorrections 和 vocabularySuggestions 的要求
         const promptText = `
         You are an expert IELTS Examiner. Evaluate the following IELTS Task ${taskType} essay.
         Topic: "${topic}"
@@ -395,8 +422,10 @@
           "CC": 8.0,
           "LR": 7.0,
           "GRA": 8.0,
-          "feedback": "Write your detailed evaluation in Markdown format here. IMPORTANT: Use \\n\\n to clearly separate different paragraphs and criteria. Use bullet points for specific corrections.",
-          "modelEssay": "Write a complete Band 9 model essay here. IMPORTANT: Use \\n\\n for clear paragraph breaks."
+          "feedback": "General feedback on TR, CC, LR, and GRA. Highlight what the student did well and what they need to improve. Use \\n\\n to separate paragraphs.",
+          "grammarCorrections": "Identify specific grammar, punctuation, and spelling mistakes from the essay. Provide the original incorrect sentence and your corrected version. Use bullet points.",
+          "vocabularySuggestions": "Identify words or phrases that the student repeated frequently or used too basically. Provide a list of these words along with 2-3 higher-level (Band 7+) synonyms or better phrasings. Use bullet points.",
+          "modelEssay": "Write a complete Band 9 model essay based on the topic. Use \\n\\n for clear paragraph breaks."
         }
         `;
 
@@ -407,7 +436,7 @@
         if (taskType === "1" && imageSrc && imageSrc.startsWith('data:image')) {
             let cleanImageSrc = imageSrc.replace('data:image/jpg;base64,', 'data:image/jpeg;base64,');
             if (!cleanImageSrc.match(/^data:image\/(png|jpeg|webp|gif);base64,/)) {
-                alert("❌ 圖片格式不支援！只接受 PNG, JPG, WebP 或 GIF。");
+                alert("❌ Image format not supported! Please use PNG, JPG, WebP, or GIF.");
                 resetUI(); return;
             }
             currentModel = 'command-a-vision-07-2025';
@@ -425,13 +454,13 @@
                 body: JSON.stringify({ model: currentModel, messages: [{ role: "user", content: messagesContent }] })
             });
 
-            if (!response.ok) throw new Error(`API 錯誤狀態碼：${response.status}`);
+            if (!response.ok) throw new Error(`API Error Code: ${response.status}`);
             
             const aiText = (await response.json()).message.content[0].text;
             
             // 抓取 JSON 區塊
             const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) throw new Error("AI 回傳格式異常，無法繪製圖表。請重新評估一次。");
+            if (!jsonMatch) throw new Error("AI returned an invalid format. Please try again.");
             
             // 清洗字串：濾除導致 JSON.parse 崩潰的隱藏控制字元
             let rawJsonStr = jsonMatch[0].replace(/[\u0000-\u0009\u000B-\u001F]/g, ""); 
@@ -440,13 +469,15 @@
             try {
                 resultData = JSON.parse(rawJsonStr);
             } catch (parseError) {
-                console.log("原始回傳字串：", rawJsonStr);
-                throw new Error("AI 生成的文章格式出現不合法的換行符號，導致解析失敗。請再按一次「提前完成」重試！");
+                console.log("Raw Response:", rawJsonStr);
+                throw new Error("Failed to parse AI response. Please click 'Finish & Submit' to try again.");
             }
 
-            // 渲染文字內容 (這時有加入 breaks: true 設定，換行會更漂亮)
-            document.getElementById('result-content').innerHTML = marked.parse(resultData.feedback);
-            document.getElementById('model-essay-content').innerHTML = marked.parse(resultData.modelEssay);
+            // 渲染文字內容
+            document.getElementById('result-content').innerHTML = marked.parse(resultData.feedback || "No general feedback provided.");
+            document.getElementById('grammar-content').innerHTML = marked.parse(resultData.grammarCorrections || "No major grammar issues found! Great job.");
+            document.getElementById('vocab-content').innerHTML = marked.parse(resultData.vocabularySuggestions || "Vocabulary usage is varied. Keep it up!");
+            document.getElementById('model-essay-content').innerHTML = marked.parse(resultData.modelEssay || "Model essay could not be generated.");
 
             // 繪製總分儀表板
             document.getElementById('score-text').innerText = resultData.overallScore;
@@ -466,7 +497,7 @@
                 data: {
                     labels: [trLabel, 'Coherence & Cohesion', 'Lexical Resource', 'Grammatical Accuracy'],
                     datasets: [{
-                        label: '得分 (Band Score)',
+                        label: 'Band Score',
                         data: [resultData.TR, resultData.CC, resultData.LR, resultData.GRA],
                         backgroundColor: 'rgba(57, 89, 77, 0.3)',
                         borderColor: 'rgba(57, 89, 77, 1)',
@@ -489,8 +520,8 @@
             document.getElementById('result-container').style.display = 'block';
 
         } catch (error) {
-            console.error("錯誤詳情:", error);
-            alert(`❌ 發生錯誤：\n${error.message}`);
+            console.error("Error Details:", error);
+            alert(`❌ Error:\n${error.message}`);
             resetUI();
         } finally {
             document.getElementById('loader').style.display = 'none';
