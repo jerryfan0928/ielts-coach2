@@ -173,12 +173,12 @@
     
     <div id="setup-section">
         <div class="form-group">
-            <label for="apiKey">🔑 Cohere API Key</label>
+            <label for="apiKey">Cohere API Key</label>
             <input type="password" id="apiKey" placeholder="請貼上你的 API Key">
         </div>
 
         <div class="form-group">
-            <label for="taskType">⏳ 選擇寫作任務</label>
+            <label for="taskType">Task</label>
             <select id="taskType" onchange="toggleImageUpload()">
                 <option value="1">Task 1  - 20 min</option>
                 <option value="2">Task 2  - 40 min</option>
@@ -186,17 +186,17 @@
         </div>
 
         <div class="form-group" id="image-upload-group">
-            <label for="taskImage">📊 上傳圖表照片 (選填)</label>
+            <label for="taskImage">charts:</label>
             <input type="file" id="taskImage" accept="image/png, image/jpeg, image/jpg, image/webp">
             <img id="setup-image-preview" src="" alt="圖表預覽" style="display:none; max-width: 100%; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc;">
         </div>
 
         <div class="form-group">
-            <label for="topic">📌 寫作題目文字</label>
+            <label for="topic">problem statement</label>
             <textarea id="topic" rows="3" placeholder="請在此貼上完整的題目敘述 (例如：The chart below shows...)"></textarea>
         </div>
 
-        <button onclick="startSimulation()">🚀 Start</button>
+        <button onclick="startSimulation()">Start</button>
     </div>
 
     <div id="writing-section">
@@ -215,7 +215,7 @@
         </div>
 
         <div class="form-group">
-            <label for="essay">✍️ Your answer</label>
+            <label for="essay">Your essay</label>
             <textarea id="essay" rows="15" placeholder="Take your time！..."></textarea>
         </div>
 
