@@ -31,152 +31,59 @@
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
-        h1, h2, h3 {
-            color: var(--primary-color);
-        }
-        h1 {
-            text-align: center;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: var(--secondary-color);
-        }
+        h1, h2, h3 { color: var(--primary-color); }
+        h1 { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--secondary-color); }
         input[type="password"], input[type="file"], textarea, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-family: inherit;
-            font-size: 16px;
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; font-family: inherit;
         }
         textarea { resize: vertical; }
-        .note {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 4px;
-        }
         button {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: background-color 0.3s;
+            background-color: var(--secondary-color); color: white; border: none; padding: 12px 20px;
+            font-size: 18px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s;
         }
         button:hover { background-color: #2c443b; }
-        button.submit-btn {
-            background-color: var(--danger-color);
-            margin-top: 10px;
-        }
+        button.submit-btn { background-color: var(--danger-color); margin-top: 10px; }
         button.submit-btn:hover { background-color: #a5281b; }
-        button:disabled {
-            background-color: #bdc3c7 !important;
-            cursor: not-allowed;
-        }
+        button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
         
         #writing-section, #result-container { display: none; }
 
         .topic-display-box {
-            background-color: #f8fbfa;
-            border-left: 5px solid var(--secondary-color);
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            border-radius: 0 6px 6px 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background-color: #f8fbfa; border-left: 5px solid var(--secondary-color);
+            padding: 15px 20px; margin-bottom: 25px; border-radius: 0 6px 6px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .topic-display-box h3 { margin-top: 0; font-size: 18px; }
 
         /* 計時器樣式 */
-        .timer-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            position: relative;
-        }
+        .timer-container { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; position: relative; }
         .progress-ring { width: 120px; height: 120px; }
-        .progress-ring__circle-bg {
-            stroke: #e6e6e6; stroke-width: 8; fill: transparent;
-        }
+        .progress-ring__circle-bg { stroke: #e6e6e6; stroke-width: 8; fill: transparent; }
         .progress-ring__circle {
-            stroke: var(--secondary-color); stroke-width: 8;
-            stroke-linecap: round; fill: transparent;
-            stroke-dasharray: 326.726; stroke-dashoffset: 0;
-            transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+            stroke: var(--secondary-color); stroke-width: 8; stroke-linecap: round; fill: transparent;
+            stroke-dasharray: 326.726; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
             transform: rotate(-90deg); transform-origin: 50% 50%;
         }
-        .timer-text {
-            position: absolute; font-size: 24px; font-weight: bold;
-            color: var(--primary-color); font-variant-numeric: tabular-nums;
-        }
+        .timer-text { position: absolute; font-size: 24px; font-weight: bold; color: var(--primary-color); font-variant-numeric: tabular-nums; }
 
-        .loader {
-            display: none; text-align: center; margin-top: 20px;
-            font-weight: bold; color: var(--secondary-color);
-        }
-        
+        .loader { display: none; text-align: center; margin-top: 20px; font-weight: bold; color: var(--secondary-color); }
         #result-container { margin-top: 30px; }
         
-        /* 視覺化圖表區塊 */
         .dashboard {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            align-items: center;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
+            display: flex; flex-wrap: wrap; justify-content: space-around; align-items: center;
+            background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px;
         }
         .gauge-container { position: relative; text-align: center; }
-        .gauge-text-container {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-        }
+        .gauge-text-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .chart-container { width: 300px; height: 300px; }
         
-        /* 各類回饋區塊樣式 */
-        .feedback-box {
-            background-color: #f4f7f6; padding: 20px;
-            border-radius: 6px; border: 1px solid #d1e0d9;
-            margin-bottom: 20px;
-        }
-        .grammar-box {
-            background-color: #fdf5f5; padding: 20px;
-            border-radius: 6px; border-left: 5px solid var(--danger-color);
-            margin-bottom: 20px;
-        }
-        .vocab-box {
-            background-color: #f4f8fc; padding: 20px;
-            border-radius: 6px; border-left: 5px solid var(--blue-color);
-            margin-bottom: 20px;
-        }
-        .model-essay-box {
-            background-color: #fff9e6; padding: 20px;
-            border-radius: 6px; border-left: 5px solid var(--gold-color);
-            margin-bottom: 20px;
-        }
+        .feedback-box { background-color: #f4f7f6; padding: 20px; border-radius: 6px; border: 1px solid #d1e0d9; margin-bottom: 20px; }
+        .grammar-box { background-color: #fdf5f5; padding: 20px; border-radius: 6px; border-left: 5px solid var(--danger-color); margin-bottom: 20px; }
+        .vocab-box { background-color: #f4f8fc; padding: 20px; border-radius: 6px; border-left: 5px solid var(--blue-color); margin-bottom: 20px; }
+        .model-essay-box { background-color: #fff9e6; padding: 20px; border-radius: 6px; border-left: 5px solid var(--gold-color); margin-bottom: 20px; }
 
-        /* 讓文字區塊內的行距和段落更清楚 */
-        .feedback-box p, .feedback-box ul, 
-        .grammar-box p, .grammar-box ul,
-        .vocab-box p, .vocab-box ul,
-        .model-essay-box p {
-            margin-bottom: 1em;
-        }
+        .feedback-box p, .feedback-box ul, .grammar-box p, .grammar-box ul, .vocab-box p, .vocab-box ul, .model-essay-box p { margin-bottom: 1em; }
         pre { background-color: #e8ecea; padding: 10px; border-radius: 4px; overflow-x: auto; }
     </style>
 </head>
@@ -201,7 +108,7 @@
 
         <div class="form-group" id="image-upload-group">
             <label for="taskImage">Charts / Images:</label>
-            <input type="file" id="taskImage" accept="image/png, image/jpeg, image/jpg, image/webp">
+            <input type="file" id="taskImage" accept="image/png, image/jpeg, image/webp, image/gif">
             <img id="setup-image-preview" src="" alt="Image Preview" style="display:none; max-width: 100%; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc;">
         </div>
 
@@ -221,10 +128,7 @@
         </div>
 
         <div class="timer-container">
-            <svg class="progress-ring">
-                <circle class="progress-ring__circle-bg" cx="60" cy="60" r="52"></circle>
-                <circle class="progress-ring__circle" id="timer-circle" cx="60" cy="60" r="52"></circle>
-            </svg>
+            <svg class="progress-ring"><circle class="progress-ring__circle-bg" cx="60" cy="60" r="52"></circle><circle class="progress-ring__circle" id="timer-circle" cx="60" cy="60" r="52"></circle></svg>
             <div class="timer-text" id="timer-text">00:00</div>
         </div>
 
@@ -245,20 +149,14 @@
             <div class="gauge-container">
                 <svg width="200" height="200">
                     <circle cx="100" cy="100" r="80" fill="none" stroke="#e6e6e6" stroke-width="16" />
-                    <circle id="score-gauge" cx="100" cy="100" r="80" fill="none" stroke="var(--secondary-color)" 
-                            stroke-width="16" stroke-dasharray="502.65" stroke-dashoffset="502.65" 
-                            stroke-linecap="round" transform="rotate(90 100 100)" 
-                            style="transition: stroke-dashoffset 1.5s cubic-bezier(0.25, 1, 0.5, 1);" />
+                    <circle id="score-gauge" cx="100" cy="100" r="80" fill="none" stroke="var(--secondary-color)" stroke-width="16" stroke-dasharray="502.65" stroke-dashoffset="502.65" stroke-linecap="round" transform="rotate(90 100 100)" style="transition: stroke-dashoffset 1.5s cubic-bezier(0.25, 1, 0.5, 1);" />
                 </svg>
                 <div class="gauge-text-container">
                     <div style="font-size: 14px; color: #666; font-weight: bold;">OVERALL</div>
                     <div id="score-text" style="font-size: 42px; font-weight: bold; color: var(--primary-color); line-height: 1;">0.0</div>
                 </div>
             </div>
-
-            <div class="chart-container">
-                <canvas id="radarChart"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="radarChart"></canvas></div>
         </div>
 
         <div class="feedback-box">
@@ -284,15 +182,9 @@
 </div>
 
 <script>
-    // 🌟 設定 Marked.js：允許單一換行符號 (\n) 直接轉成換行 (<br>)
-    marked.use({
-        breaks: true,
-        gfm: true
-    });
-
+    marked.use({ breaks: true, gfm: true });
     let myRadarChart = null; 
 
-    // === 圖片上傳與預覽邏輯 ===
     window.onload = function() { toggleImageUpload(); };
 
     function toggleImageUpload() {
@@ -323,10 +215,7 @@
         }
     });
 
-    // === 計時器邏輯 ===
-    let timerInterval;
-    let totalSeconds;
-    let remainingSeconds;
+    let timerInterval, totalSeconds, remainingSeconds;
     const circle = document.getElementById('timer-circle');
     const radius = circle.r.baseVal.value;
     const circumference = radius * 2 * Math.PI;
@@ -334,8 +223,7 @@
     circle.style.strokeDashoffset = 0;
 
     function setProgress(percent) {
-        const offset = circumference - percent / 100 * circumference;
-        circle.style.strokeDashoffset = offset;
+        circle.style.strokeDashoffset = circumference - percent / 100 * circumference;
     }
 
     function formatTime(seconds) {
@@ -348,22 +236,17 @@
         const apiKey = document.getElementById('apiKey').value.trim();
         const topic = document.getElementById('topic').value.trim();
         
-        if (!apiKey || !topic) {
-            alert("⚠️ Please ensure both API Key and Prompt are filled in!");
-            return;
-        }
+        if (!apiKey || !topic) { alert("⚠️ Please ensure both API Key and Prompt are filled in!"); return; }
 
         document.getElementById('writing-topic-text').innerText = topic;
         const writingImage = document.getElementById('writing-topic-image');
         writingImage.style.display = writingImage.getAttribute('src') ? 'block' : 'none';
 
-        const taskType = document.getElementById('taskType').value;
-        totalSeconds = taskType === "1" ? 20 * 60 : 40 * 60;
-
+        totalSeconds = document.getElementById('taskType').value === "1" ? 20 * 60 : 40 * 60;
         remainingSeconds = totalSeconds;
+        
         document.getElementById('setup-section').style.display = 'none';
         document.getElementById('writing-section').style.display = 'block';
-        
         document.getElementById('essay').focus(); 
         
         document.getElementById('timer-text').innerText = formatTime(remainingSeconds);
@@ -373,16 +256,20 @@
             remainingSeconds--;
             document.getElementById('timer-text').innerText = formatTime(remainingSeconds);
             setProgress((remainingSeconds / totalSeconds) * 100);
-
             if (remainingSeconds <= 300) circle.style.stroke = "var(--danger-color)";
-            if (remainingSeconds <= 0) {
-                clearInterval(timerInterval);
-                submitEssay(true); 
-            }
+            if (remainingSeconds <= 0) { clearInterval(timerInterval); submitEssay(true); }
         }, 1000);
     }
 
-    // === API 呼叫與視覺化圖表處理 ===
+    // 🌟 防呆處理：把 AI 亂回的陣列強制轉換成字串
+    function ensureString(content) {
+        if (!content) return "No feedback provided.";
+        if (Array.isArray(content)) {
+            return content.map(item => typeof item === 'string' ? item : JSON.stringify(item)).join('\n\n');
+        }
+        return String(content);
+    }
+
     async function submitEssay(isAutoSubmit) {
         clearInterval(timerInterval);
 
@@ -393,135 +280,116 @@
         const imageSrc = document.getElementById('writing-topic-image').getAttribute('src');
         
         if (!essay && !isAutoSubmit) { alert("⚠️ Essay is empty. Please write something before submitting."); return; }
-        if (isAutoSubmit) { alert("⏰ Time's up!"); } 
-        else { if (!confirm("Are you sure you want to submit your essay?")) return; }
+        if (isAutoSubmit) { alert("⏰ Time's up!"); } else { if (!confirm("Are you sure you want to submit your essay?")) return; }
 
         document.getElementById('essay').disabled = true;
         document.getElementById('submitBtn').disabled = true;
         document.getElementById('loader').style.display = 'block';
         document.getElementById('result-container').style.display = 'none';
 
-        // 🌟 更新版 Prompt：加入了 grammarCorrections 和 vocabularySuggestions 的要求
         const promptText = `
-        You are an expert IELTS Examiner. Evaluate the following IELTS Task ${taskType} essay.
+        You are an expert IELTS Examiner. Evaluate this IELTS Task ${taskType} essay.
         Topic: "${topic}"
-        ${(taskType === "1" && imageSrc) ? "(Image attached for context)" : ""}
         Essay: "${essay || '(Blank paper)'}"
         
-        You MUST respond ONLY with a raw JSON object. 
-        ⚠️ CRITICAL JSON RULES:
-        1. Do NOT wrap the response in \`\`\`json markdown blocks. Return the JSON directly.
-        2. All string values MUST NOT contain raw line breaks. You MUST escape newlines by using "\\n".
-        3. Escape any internal double quotes using "\\"".
-        4. Do not include tab characters, use spaces instead.
-        
-        The JSON must exactly match this structure:
+        CRITICAL INSTRUCTIONS:
+        You MUST respond strictly with a valid JSON object. 
+        DO NOT return JSON arrays for text fields. All text fields MUST be a single String.
+        Use "\\n\\n" inside strings for line breaks.
+
+        Required JSON structure:
         {
           "overallScore": 7.5,
           "TR": 7.0,
           "CC": 8.0,
           "LR": 7.0,
           "GRA": 8.0,
-          "feedback": "General feedback on TR, CC, LR, and GRA. Highlight what the student did well and what they need to improve. Use \\n\\n to separate paragraphs.",
-          "grammarCorrections": "Identify specific grammar, punctuation, and spelling mistakes from the essay. Provide the original incorrect sentence and your corrected version. Use bullet points.",
-          "vocabularySuggestions": "Identify words or phrases that the student repeated frequently or used too basically. Provide a list of these words along with 2-3 higher-level (Band 7+) synonyms or better phrasings. Use bullet points.",
-          "modelEssay": "Write a complete Band 9 model essay based on the topic. Use \\n\\n for clear paragraph breaks."
+          "feedback": "String: General feedback...",
+          "grammarCorrections": "String: List grammar mistakes using bullet points...",
+          "vocabularySuggestions": "String: List words to upgrade using bullet points...",
+          "modelEssay": "String: A Band 9 model essay..."
         }
         `;
 
         let messagesContent = [{ "type": "text", "text": promptText }];
         let currentModel = 'command-a-03-2025';
+        let requestBody = {
+            model: currentModel,
+            messages: [{ role: "user", content: messagesContent }],
+            // 🌟 強制啟用 JSON 模式，大幅降低 Control Character 換行報錯機率
+            response_format: { type: "json_object" }
+        };
 
-        // 處理圖片上傳與格式修正
+        // 🌟 強化版圖片格式處理，確保嚴格符合 Cohere 規範
         if (taskType === "1" && imageSrc && imageSrc.startsWith('data:image')) {
-            let cleanImageSrc = imageSrc.replace('data:image/jpg;base64,', 'data:image/jpeg;base64,');
-            if (!cleanImageSrc.match(/^data:image\/(png|jpeg|webp|gif);base64,/)) {
-                alert("❌ Image format not supported! Please use PNG, JPG, WebP, or GIF.");
+            let cleanImageSrc = imageSrc.replace('image/jpg', 'image/jpeg');
+            const mimeMatch = cleanImageSrc.match(/^data:(image\/(png|jpeg|webp|gif));base64,(.+)$/);
+            
+            if (!mimeMatch) {
+                alert("❌ Image format not supported by AI! Please ensure it's a standard PNG, JPEG, WebP, or GIF.");
                 resetUI(); return;
             }
+            
+            cleanImageSrc = `data:${mimeMatch[1]};base64,${mimeMatch[3]}`;
             currentModel = 'command-a-vision-07-2025';
+            requestBody.model = currentModel;
             messagesContent.push({ "type": "image_url", "image_url": { "url": cleanImageSrc } });
+            
+            // 註：有些 Vision 模型可能不支援 JSON Mode，如果在 Vision 模式下報錯可考慮移除 response_format
+            delete requestBody.response_format; 
         }
 
         try {
             const response = await fetch("https://api.cohere.com/v2/chat", {
                 method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({ model: currentModel, messages: [{ role: "user", content: messagesContent }] })
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) throw new Error(`API Error Code: ${response.status}`);
             
             const aiText = (await response.json()).message.content[0].text;
-            
-            // 抓取 JSON 區塊
             const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) throw new Error("AI returned an invalid format. Please try again.");
+            if (!jsonMatch) throw new Error("AI returned an invalid format.");
             
-            // 清洗字串：濾除導致 JSON.parse 崩潰的隱藏控制字元
-            let rawJsonStr = jsonMatch[0].replace(/[\u0000-\u0009\u000B-\u001F]/g, ""); 
+            // 🌟 粗暴且安全的 JSON 字串清洗，過濾不合法字元與真實換行
+            let rawJsonStr = jsonMatch[0]
+                .replace(/[\u0000-\u0009\u000B-\u001F]/g, "") 
+                .replace(/\n(?([^"]*"[^"]*")*[^"]*$)/g, "\\n"); // 嘗試修復未逸出的換行 (以防萬一)
             
             let resultData;
             try {
                 resultData = JSON.parse(rawJsonStr);
-            } catch (parseError) {
-                console.log("Raw Response:", rawJsonStr);
-                throw new Error("Failed to parse AI response. Please click 'Finish & Submit' to try again.");
+            } catch (e) {
+                // 如果正則修復失敗，退回使用原始匹配
+                resultData = JSON.parse(jsonMatch[0].replace(/[\u0000-\u001F]/g, ""));
             }
 
-            // 渲染文字內容
-            document.getElementById('result-content').innerHTML = marked.parse(resultData.feedback || "No general feedback provided.");
-            document.getElementById('grammar-content').innerHTML = marked.parse(resultData.grammarCorrections || "No major grammar issues found! Great job.");
-            document.getElementById('vocab-content').innerHTML = marked.parse(resultData.vocabularySuggestions || "Vocabulary usage is varied. Keep it up!");
-            document.getElementById('model-essay-content').innerHTML = marked.parse(resultData.modelEssay || "Model essay could not be generated.");
+            // 🌟 呼叫 ensureString 確保 marked.js 不會因為收到 Array 而崩潰
+            document.getElementById('result-content').innerHTML = marked.parse(ensureString(resultData.feedback));
+            document.getElementById('grammar-content').innerHTML = marked.parse(ensureString(resultData.grammarCorrections));
+            document.getElementById('vocab-content').innerHTML = marked.parse(ensureString(resultData.vocabularySuggestions));
+            document.getElementById('model-essay-content').innerHTML = marked.parse(ensureString(resultData.modelEssay));
 
-            // 繪製總分儀表板
             document.getElementById('score-text').innerText = resultData.overallScore;
-            const gaugeCircle = document.getElementById('score-gauge');
             const gaugeCircumference = 502.65; 
-            const percent = resultData.overallScore / 9.0;
-            const offset = gaugeCircumference - (percent * gaugeCircumference);
-            setTimeout(() => { gaugeCircle.style.strokeDashoffset = offset; }, 100);
+            setTimeout(() => { document.getElementById('score-gauge').style.strokeDashoffset = gaugeCircumference - ((resultData.overallScore / 9.0) * gaugeCircumference); }, 100);
 
-            // 繪製雷達圖
             if (myRadarChart) myRadarChart.destroy(); 
-            const ctx = document.getElementById('radarChart').getContext('2d');
-            const trLabel = taskType === "1" ? "Task Achievement" : "Task Response";
-            
-            myRadarChart = new Chart(ctx, {
+            myRadarChart = new Chart(document.getElementById('radarChart').getContext('2d'), {
                 type: 'radar',
                 data: {
-                    labels: [trLabel, 'Coherence & Cohesion', 'Lexical Resource', 'Grammatical Accuracy'],
-                    datasets: [{
-                        label: 'Band Score',
-                        data: [resultData.TR, resultData.CC, resultData.LR, resultData.GRA],
-                        backgroundColor: 'rgba(57, 89, 77, 0.3)',
-                        borderColor: 'rgba(57, 89, 77, 1)',
-                        pointBackgroundColor: '#c0392b',
-                        borderWidth: 2
-                    }]
+                    labels: [taskType === "1" ? "Task Achievement" : "Task Response", 'Coherence & Cohesion', 'Lexical Resource', 'Grammatical Accuracy'],
+                    datasets: [{ label: 'Band Score', data: [resultData.TR, resultData.CC, resultData.LR, resultData.GRA], backgroundColor: 'rgba(57, 89, 77, 0.3)', borderColor: 'rgba(57, 89, 77, 1)', pointBackgroundColor: '#c0392b', borderWidth: 2 }]
                 },
-                options: {
-                    scales: {
-                        r: {
-                            min: 0, max: 9,
-                            ticks: { stepSize: 1, backdropColor: 'transparent' },
-                            pointLabels: { font: { size: 12, weight: 'bold' } }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
-                }
+                options: { scales: { r: { min: 0, max: 9, ticks: { stepSize: 1, backdropColor: 'transparent' } } }, plugins: { legend: { display: false } } }
             });
 
             document.getElementById('result-container').style.display = 'block';
 
         } catch (error) {
-            console.error("Error Details:", error);
-            alert(`❌ Error:\n${error.message}`);
+            console.error("Error:", error);
+            alert(`❌ 發生錯誤，請稍後重試。\n(錯誤詳情: ${error.message})`);
             resetUI();
         } finally {
             document.getElementById('loader').style.display = 'none';
