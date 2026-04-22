@@ -250,7 +250,7 @@
         <div class="feedback-box" id="result-content"></div>
         
         <div class="model-essay-box">
-            <h3 style="margin-top: 0; color: var(--gold-color);">✨ AI 生成 Band 9 滿分範文</h3>
+            <h3 style="margin-top: 0; color: var(--gold-color);">AI-generated essay</h3>
             <div id="model-essay-content"></div>
         </div>
     </div>
@@ -365,9 +365,9 @@
         const taskType = document.getElementById('taskType').value;
         const imageSrc = document.getElementById('writing-topic-image').getAttribute('src');
         
-        if (!essay && !isAutoSubmit) { alert("⚠️ 你還沒寫任何內容喔！"); return; }
-        if (isAutoSubmit) { alert("⏰ 時間到！系統即將自動為您繳交試卷。"); } 
-        else { if (!confirm("確定要提前交卷嗎？")) return; }
+        if (!essay && !isAutoSubmit) { alert("⚠️ Not attempted"); return; }
+        if (isAutoSubmit) { alert("⏰ Time's up.。"); } 
+        else { if (!confirm("Confirm submittingyour essay？")) return; }
 
         document.getElementById('essay').disabled = true;
         document.getElementById('submitBtn').disabled = true;
